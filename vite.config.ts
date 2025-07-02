@@ -6,6 +6,7 @@ import { defineConfig } from 'vite'
 export default defineConfig({
   plugins: [
     react(),
+    base: '/inonic_test/',
     legacy()
   ],
   test: {
