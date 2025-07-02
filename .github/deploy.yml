@@ -1,0 +1,51 @@
+name: Deploy Ionic PWA to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main # Or 'master' if that's your primary branch
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest # A virtual machine where your code will run
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4 # Action to check out your repository code
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Use a Node.js version compatible with your Ionic project
+
+      - name: Install Ionic CLI (optional, if you use `ionic` commands directly)
+        run: npm install -g @ionic/cli
+
+      - name: Install Dependencies
+        run: npm install # Installs all packages from package.json
+
+      - name: Build Ionic App for Production
+        run: npm run build -- --prod # This typically creates the www/ folder
+
+      - name: Upload Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          name: github-pages # Name of the artifact
+          path: www # The directory containing your built web assets
+
+  deploy:
+    needs: build-and-deploy # This job depends on the previous job completing successfully
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    permissions:
+      pages: write # Required to deploy to GitHub Pages
+      id-token: write # Required for OIDC authentication to GitHub Pages
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
